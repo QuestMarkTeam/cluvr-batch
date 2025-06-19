@@ -2,12 +2,12 @@ version: '3.8'
 
 services:
   # Spring Boot application (cluvr-batch)
-  cluvr-batch:
+  spring:
     restart: always
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: spring
+    container_name: cluvr-batch
     ports:
       - "8080:8080"
     env_file:
