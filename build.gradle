@@ -25,9 +25,12 @@ dependencies {
     // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'io.lettuce:lettuce-core'
+
+    implementation 'mysql:mysql-connector-java:8.0.29'
+
     // Runtime-only JDBC drivers
     runtimeOnly 'com.h2database:h2'
-    runtimeOnly 'com.mysql:mysql-connector-j'
+    implementation 'com.mysql:mysql-connector-j'
     // jpa
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     // Spring Batch
