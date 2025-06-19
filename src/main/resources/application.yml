@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: cluvr
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+  batch:
+    job:
+      enabled: false  # 앱 실행 시 자동 실행 방지 (직접 JobLauncher 사용하기 위함)
+    jdbc:
+      initialize-schema: always  # 개발 환경에서는 메타테이블 자동 생성
+
+  datasource:
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/${DB_NAME}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        use_sql_comments: true
+        dialect: org.hibernate.dialect.MySQLDialect
+        highlight_sql: true
+
+server:
+  error:
+    include-message: always
