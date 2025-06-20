@@ -2,23 +2,59 @@ pipeline {
     agent any
 
     environment {
-        EC2_HOST = 'ubuntu@54.212.54.184'        // 너의 batch 서버 IP
-        EC2_DIR = '/home/ubuntu/cluvr-batch'       // EC2 내부에서 git clone 받은 위치
+        AWS_REGION = 'us-west-2'
+        AWS_ACCOUNT_ID = '617373894870'
+        ECR_REPO = 'cluvr-chat'
+        ECR_REGISTRY = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+        IMAGE_TAG = 'latest'
+        CHAT_EC2_IP = '54.200.146.243'
     }
 
     stages {
-        stage('Deploy to EC2') {
+        stage('Checkout SCM') {
             steps {
-                // batch 서비스만 재빌드 및 재시작 (다른 컨테이너는 유지)
-                sh """
-                ssh -o StrictHostKeyChecking=no -i /var/lib/jenkins/.ssh/id_rsa ${EC2_HOST} '
-                cd ${EC2_DIR} &&
-                git pull origin main &&
-                sudo docker-compose rm -f spring || true &&
-                sudo docker container prune -f &&
-                sudo docker-compose up -d --build spring
-                '
-                """
+                echo "✅ Checking out source code from GitHub..."
+                checkout scm
+            }
+        }
+
+        stage('Build & Deploy only if on develop branch') {
+            when {
+                allOf {
+                    branch 'develop' // develop 브랜치일 때만
+                }
+            }
+
+            steps {
+                echo "✅ Deploying develop branch build..."
+
+                // Build the Docker image
+                script {
+                    sh '''
+                    docker build -t $ECR_REPO:$IMAGE_TAG .
+                    docker tag $ECR_REPO:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG
+                    '''
+                }
+
+                // AWS ECR Login and Push Image
+                script {
+                    sh '''
+                    aws ecr get-login-password --region $AWS_REGION \
+                        | docker login --username AWS --password-stdin $ECR_REGISTRY
+
+                    docker push $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG
+                    '''
+                }
+
+                // SCP and SSH to EC2 to deploy
+                script {
+                    sh """
+                    ssh -i /var/lib/jenkins/.ssh/id_rsa ubuntu@$CHAT_EC2_IP << 'EOF'
+                    docker pull $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG
+                    docker run -d -p 8082:8082 $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG
+                    EOF
+                    """
+                }
             }
         }
     }
