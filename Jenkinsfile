@@ -7,7 +7,7 @@ pipeline {
         ECR_REPO = 'cluvr-batch'
         ECR_REGISTRY = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
         IMAGE_TAG = 'latest'
-        BATH_EC2_IP = '54.200.146.243'
+        BATCH_EC2_IP = '54.200.146.243' // 배치 서버 IP
     }
 
     stages {
@@ -20,43 +20,39 @@ pipeline {
 
         stage('Build & Deploy only if on develop branch') {
             when {
-                allOf {
-                    branch 'develop' // develop 브랜치일 때만
-                }
+                branch 'develop'
             }
 
             steps {
                 echo "✅ Deploying develop branch build..."
 
-                // Build the Docker image
+                // Docker Build & Tag
                 script {
-                    sh '''
-                    docker build -t $ECR_REPO:$IMAGE_TAG .
-                    docker tag $ECR_REPO:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG
-                    '''
+                    sh """
+                    docker build -t ${ECR_REPO}:${IMAGE_TAG} .
+                    docker tag ${ECR_REPO}:${IMAGE_TAG} ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
+                    """
                 }
 
-                // AWS ECR Login and Push Image
+                // AWS ECR 로그인 및 푸시
                 script {
-                    sh '''
-                    aws ecr get-login-password --region $AWS_REGION \
-                        | docker login --username AWS --password-stdin $ECR_REGISTRY
-
-                    docker push $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG
-                    '''
+                    sh """
+                    aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}
+                    docker push ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
+                    """
                 }
 
-                // SCP and SSH to EC2 to deploy
-                   script {
-                       sh """
-                       ssh -i /var/lib/jenkins/.ssh/id_rsa ubuntu@${BATH_EC2_IP} << EOF
-                       docker pull ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
-                       docker stop cluvr-batch || true
-                       docker rm cluvr-batch || true
-                       docker run -d --name cluvr-batch -p 8082:8080 ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
-                       EOF
-                       """
-                   }
+                // EC2 접속 후 컨테이너 pull & 실행
+                script {
+                    sh """
+                    ssh -i /var/lib/jenkins/.ssh/id_rsa ubuntu@${BATCH_EC2_IP} << EOF
+                    docker pull ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
+                    docker stop ${ECR_REPO} || true
+                    docker rm ${ECR_REPO} || true
+                    docker run -d --name ${ECR_REPO} -p 8082:8080 ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
+                    EOF
+                    """
+                }
             }
         }
     }
