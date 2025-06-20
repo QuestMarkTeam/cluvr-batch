@@ -2,64 +2,53 @@ pipeline {
     agent any
 
     environment {
+        MODULE = 'cluvr-batch'
         AWS_REGION = 'us-west-2'
-        AWS_ACCOUNT_ID = '617373894870'
+        ECR_REGISTRY = '617373894870.dkr.ecr.us-west-2.amazonaws.com'
         ECR_REPO = 'cluvr-batch'
-        ECR_REGISTRY = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
         IMAGE_TAG = 'latest'
-        BATCH_EC2_IP = '54.212.54.184'
+        BATCH_EC2_IP = '54.212.54.184' // 배포 EC2 퍼블릭 IP
     }
 
     stages {
-        stage('Checkout SCM') {
+        stage('Build Docker Image') {
             steps {
-                echo "✅ Checking out source code from GitHub..."
-                checkout scm
+                echo '✅ Building Docker image...'
+                sh "docker build -t ${MODULE}:latest ."
             }
         }
 
-        stage('Build & Deploy only if on develop branch') {
-            when {
-                branch 'develop'
-            }
-
+        stage('Push to ECR') {
             steps {
-                echo "✅ Deploying develop branch build..."
-
-                script {
-                    // 1. Docker Build & Tag
-                    sh """
-                    docker build -t ${ECR_REPO}:${IMAGE_TAG} .
-                    docker tag ${ECR_REPO}:${IMAGE_TAG} ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
-                    """
-                }
-
-                script {
-                    // 2. Docker Push to ECR
-                    sh """
-                    aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}
+                echo '✅ Logging in to ECR...'
+                sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}"
+                echo '✅ Tag and push to ECR...'
+                sh """
+                    docker tag ${MODULE}:latest ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
                     docker push ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
-                    """
-                }
-                script {
-                    // 3. Remote Deploy on EC2
-                    sh """
-                    ssh -i /var/lib/jenkins/.ssh/id_rsa ubuntu@${BATCH_EC2_IP} << 'EOF'
-                    echo "✅ ECR 로그인"
-                    aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}
+                """
+            }
+        }
 
-                    echo "✅ Pulling latest Docker image..."
-                    docker pull ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
+        stage('Deploy to EC2') {
+            steps {
+                echo '✅ Deploying on remote EC2...'
+                sh """
+ssh -o StrictHostKeyChecking=no -i /var/lib/jenkins/.ssh/id_rsa ubuntu@${BATCH_EC2_IP} << 'EOF'
+echo "✅ ECR 로그인"
+aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}
 
-                    echo "✅ Stopping and removing old container (if exists)..."
-                    docker stop ${ECR_REPO} || true
-                    docker rm ${ECR_REPO} || true
+echo "✅ 최신 Docker 이미지 pull"
+docker pull ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
 
-                    echo "✅ Running new container..."
-                    docker run -d --name ${ECR_REPO} -p 8082:8080 ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
-                    EOF
-                    """
-                }
+echo "✅ 기존 컨테이너 중지 및 제거"
+docker stop ${ECR_REPO} || true
+docker rm ${ECR_REPO} || true
+
+echo "✅ 새 컨테이너 실행"
+docker run -d --name ${ECR_REPO} -p 8080:8080 ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
+EOF
+"""
             }
         }
     }
