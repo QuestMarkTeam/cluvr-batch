@@ -30,7 +30,7 @@ services:
   redis:
     restart: always
     image: redis:7.2
-    container_name: cluvr-redis         # ✅ 변경됨
+    container_name: cluvr_redis         # ✅ 변경됨
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
