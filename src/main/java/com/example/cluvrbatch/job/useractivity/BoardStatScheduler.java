@@ -20,7 +20,7 @@ public class BoardStatScheduler {
 	@Scheduled(cron = "0 * * * * *") // 매일 새벽 3시
 	public void runBoardStatJob() {
 		try {
-			log.info("batch 스캐쥴 잘 실행 중 0620 2020수정");
+			log.info("batch 스캐쥴 잘 실행 중 0620 2003수정");
 			boardStatJobService.runJob();
 		} catch (Exception e) {
 			// 로깅 or 슬랙 알림
