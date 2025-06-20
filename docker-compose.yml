@@ -26,33 +26,11 @@ services:
     networks:
       - cluvr-net
 
-#  # MySQL service
-#  mysql:
-#    restart: always
-#    image: mysql:8.0
-#    container_name: mysql-batch
-#    healthcheck:
-#      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
-#      interval: 10s
-#      retries: 5
-#      start_period: 20s
-#    environment:
-#      MYSQL_DATABASE: ${DB_NAME}
-#      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
-#      MYSQL_ROOT_HOST: '%'
-#      TZ: Asia/Seoul
-#    volumes:
-#      - mysql_data:/var/lib/mysql
-#    ports:
-#      - "3308:3306"
-#    networks:
-#      - cluvr-net
-
   # Redis service
   redis:
     restart: always
     image: redis:7.2
-    container_name: redis-batch
+    container_name: cluvr_redis         # ✅ 변경됨
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
@@ -65,7 +43,3 @@ services:
 networks:
   cluvr-net:
     driver: bridge
-
-volumes:
-  mysql_data:
-    driver: local
