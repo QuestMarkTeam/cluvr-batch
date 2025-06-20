@@ -42,8 +42,10 @@ pipeline {
                     """
                 }
                 script {
+                    // 3. Remote Deploy on EC2
                     sh """
                     ssh -i /var/lib/jenkins/.ssh/id_rsa ubuntu@${BATCH_EC2_IP} << 'EOF'
+
                     echo "✅ ECR 로그인"
                     aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}
 
@@ -56,6 +58,7 @@ pipeline {
 
                     echo "✅ Running new container..."
                     sudo docker run -d --name ${ECR_REPO} -p 8082:8080 ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
+
                     EOF
                     """
                 }
