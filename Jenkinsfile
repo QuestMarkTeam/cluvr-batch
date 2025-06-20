@@ -41,9 +41,7 @@ pipeline {
                     docker push ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
                     """
                 }
-
                 script {
-                    // 3. Remote Deploy on EC2
                     sh """
                     ssh -i /var/lib/jenkins/.ssh/id_rsa ubuntu@${BATCH_EC2_IP} << 'EOF'
                     echo "✅ Pulling latest Docker image..."
