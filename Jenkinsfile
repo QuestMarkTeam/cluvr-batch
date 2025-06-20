@@ -41,7 +41,6 @@ pipeline {
                     docker push ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
                     """
                 }
-
                 script {
                     // 3. Remote Deploy on EC2
                     sh """
