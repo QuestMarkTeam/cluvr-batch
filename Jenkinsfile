@@ -7,7 +7,7 @@ pipeline {
         ECR_REPO = 'cluvr-batch'
         ECR_REGISTRY = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
         IMAGE_TAG = 'latest'
-        BATCH_EC2_IP = '54.200.146.243'
+        BATCH_EC2_IP = '54.212.54.184'
     }
 
     stages {
