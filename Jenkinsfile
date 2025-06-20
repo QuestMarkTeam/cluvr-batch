@@ -22,7 +22,6 @@ pipeline {
             steps {
                 echo '✅ Logging in to ECR...'
                 sh "aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}"
-
                 echo '✅ Tag and push to ECR...'
                 sh """
                     docker tag ${MODULE}:latest ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
