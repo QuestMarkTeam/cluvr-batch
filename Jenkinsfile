@@ -1,4 +1,4 @@
-pipeline {
+ pipeline {
     agent any
 
     environment {
@@ -7,10 +7,39 @@ pipeline {
         ECR_REGISTRY = '617373894870.dkr.ecr.us-west-2.amazonaws.com'
         ECR_REPO = 'cluvr-batch'
         IMAGE_TAG = 'latest'
-        BATCH_EC2_IP = '54.212.54.184' // 배포 EC2 퍼블릭 IP
+        BATCH_EC2_IP = '54.212.54.184'
+        ENV_PATH = '/home/ubuntu/.env'
     }
 
     stages {
+
+        stage('Create .env & Send to EC2') {
+            steps {
+                echo '✅ Generating .env and sending to EC2...'
+                withCredentials([
+                    string(credentialsId: 'DB_HOST', variable: 'DB_HOST'),
+                    string(credentialsId: 'DB_PORT', variable: 'DB_PORT'),
+                    string(credentialsId: 'DB_NAME', variable: 'DB_NAME'),
+                    string(credentialsId: 'DB_USERNAME', variable: 'DB_USERNAME'),
+                    string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD'),
+                    string(credentialsId: 'REDIS_HOST', variable: 'REDIS_HOST'),
+                    string(credentialsId: 'REDIS_PORT', variable: 'REDIS_PORT')
+                ]) {
+                    sh """
+                        echo "DB_HOST=${DB_HOST}" > .env
+                        echo "DB_PORT=${DB_PORT}" >> .env
+                        echo "DB_NAME=${DB_NAME}" >> .env
+                        echo "DB_USERNAME=${DB_USERNAME}" >> .env
+                        echo "DB_PASSWORD=${DB_PASSWORD}" >> .env
+                        echo "REDIS_HOST=${REDIS_HOST}" >> .env
+                        echo "REDIS_PORT=${REDIS_PORT}" >> .env
+
+                        scp -o StrictHostKeyChecking=no -i /var/lib/jenkins/.ssh/id_rsa .env ubuntu@${BATCH_EC2_IP}:${ENV_PATH}
+                    """
+                }
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 echo '✅ Building Docker image...'
@@ -46,7 +75,7 @@ docker stop ${ECR_REPO} || true
 docker rm ${ECR_REPO} || true
 
 echo "✅ 새 컨테이너 실행"
-docker run -d --name ${ECR_REPO} -p 8080:8080 ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
+docker run -d --name ${ECR_REPO} -p 8080:8080 --env-file .env ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
 EOF
 """
             }
