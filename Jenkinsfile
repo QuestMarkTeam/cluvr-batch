@@ -44,15 +44,18 @@ pipeline {
                 script {
                     sh """
                     ssh -i /var/lib/jenkins/.ssh/id_rsa ubuntu@${BATCH_EC2_IP} << 'EOF'
+                    echo "✅ ECR 로그인"
+                    aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}
+
                     echo "✅ Pulling latest Docker image..."
-                    docker pull ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
+                    sudo docker pull ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
 
                     echo "✅ Stopping and removing old container (if exists)..."
-                    docker stop ${ECR_REPO} || true
-                    docker rm ${ECR_REPO} || true
+                    sudo docker stop ${ECR_REPO} || true
+                    sudo docker rm ${ECR_REPO} || true
 
                     echo "✅ Running new container..."
-                    docker run -d --name ${ECR_REPO} -p 8082:8080 ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
+                    sudo docker run -d --name ${ECR_REPO} -p 8082:8080 ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
                     EOF
                     """
                 }
