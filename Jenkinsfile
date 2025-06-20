@@ -27,28 +27,36 @@ pipeline {
                 echo "✅ Deploying develop branch build..."
 
                 script {
+                    // 1. Docker Build & Tag
                     sh """
-docker build -t ${ECR_REPO}:${IMAGE_TAG} .
-docker tag ${ECR_REPO}:${IMAGE_TAG} ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
-"""
+                    docker build -t ${ECR_REPO}:${IMAGE_TAG} .
+                    docker tag ${ECR_REPO}:${IMAGE_TAG} ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
+                    """
                 }
 
                 script {
+                    // 2. Docker Push to ECR
                     sh """
-aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}
-docker push ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
-"""
+                    aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}
+                    docker push ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
+                    """
                 }
 
                 script {
+                    // 3. Remote Deploy on EC2
                     sh """
-ssh -i /var/lib/jenkins/.ssh/id_rsa ubuntu@${BATCH_EC2_IP} <<EOF
-docker pull ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
-docker stop ${ECR_REPO} || true
-docker rm ${ECR_REPO} || true
-docker run -d --name ${ECR_REPO} -p 8082:8080 ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
-EOF
-"""
+                    ssh -i /var/lib/jenkins/.ssh/id_rsa ubuntu@${BATCH_EC2_IP} << 'EOF'
+                    echo "✅ Pulling latest Docker image..."
+                    docker pull ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
+
+                    echo "✅ Stopping and removing old container (if exists)..."
+                    docker stop ${ECR_REPO} || true
+                    docker rm ${ECR_REPO} || true
+
+                    echo "✅ Running new container..."
+                    docker run -d --name ${ECR_REPO} -p 8082:8080 ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
+                    EOF
+                    """
                 }
             }
         }
