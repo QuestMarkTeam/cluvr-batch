@@ -4,10 +4,10 @@ pipeline {
     environment {
         AWS_REGION = 'us-west-2'
         AWS_ACCOUNT_ID = '617373894870'
-        ECR_REPO = 'cluvr-chat'
+        ECR_REPO = 'cluvr-batch'
         ECR_REGISTRY = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
         IMAGE_TAG = 'latest'
-        CHAT_EC2_IP = '54.200.146.243'
+        BATH_EC2_IP = '54.200.146.243'
     }
 
     stages {
@@ -47,14 +47,16 @@ pipeline {
                 }
 
                 // SCP and SSH to EC2 to deploy
-                script {
-                    sh """
-                    ssh -i /var/lib/jenkins/.ssh/id_rsa ubuntu@$CHAT_EC2_IP << 'EOF'
-                    docker pull $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG
-                    docker run -d -p 8082:8082 $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG
-                    EOF
-                    """
-                }
+                   script {
+                       sh """
+                       ssh -i /var/lib/jenkins/.ssh/id_rsa ubuntu@${BATH_EC2_IP} << EOF
+                       docker pull ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
+                       docker stop cluvr-batch || true
+                       docker rm cluvr-batch || true
+                       docker run -d --name cluvr-batch -p 8082:8080 ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
+                       EOF
+                       """
+                   }
             }
         }
     }
