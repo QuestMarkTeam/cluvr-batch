@@ -7,7 +7,7 @@
         ECR_REGISTRY = '617373894870.dkr.ecr.us-west-2.amazonaws.com'
         ECR_REPO = 'cluvr-batch'
         IMAGE_TAG = 'latest'
-        BATCH_EC2_IP = '54.212.54.184'
+        EC2_IP = '54.212.54.184'
         ENV_PATH = '/home/ubuntu/.env'
     }
 
@@ -26,15 +26,13 @@
                     string(credentialsId: 'REDIS_PORT', variable: 'REDIS_PORT')
                 ]) {
                     sh """
-                        echo "DB_HOST=${DB_HOST}" > .env
-                        echo "DB_PORT=${DB_PORT}" >> .env
-                        echo "DB_NAME=${DB_NAME}" >> .env
-                        echo "DB_USERNAME=${DB_USERNAME}" >> .env
-                        echo "DB_PASSWORD=${DB_PASSWORD}" >> .env
+                        echo "SPRING_DATASOURCE_URL=jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8" >> .env
+                        echo "SPRING_DATASOURCE_USERNAME=${DB_USERNAME}" >> .env
+                        echo "SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}" >> .env
                         echo "REDIS_HOST=${REDIS_HOST}" >> .env
                         echo "REDIS_PORT=${REDIS_PORT}" >> .env
 
-                        scp -o StrictHostKeyChecking=no -i /var/lib/jenkins/.ssh/id_rsa .env ubuntu@${BATCH_EC2_IP}:${ENV_PATH}
+                        scp -o StrictHostKeyChecking=no -i /var/lib/jenkins/.ssh/id_rsa .env ubuntu@${EC2_IP}:${ENV_PATH}
                     """
                 }
             }
@@ -63,7 +61,7 @@
             steps {
                 echo '✅ Deploying on remote EC2...'
                 sh """
-ssh -o StrictHostKeyChecking=no -i /var/lib/jenkins/.ssh/id_rsa ubuntu@${BATCH_EC2_IP} << 'EOF'
+ssh -o StrictHostKeyChecking=no -i /var/lib/jenkins/.ssh/id_rsa ubuntu@${EC2_IP} << 'EOF'
 echo "✅ ECR 로그인"
 aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}
 
@@ -74,8 +72,13 @@ echo "✅ 기존 컨테이너 중지 및 제거"
 docker stop ${ECR_REPO} || true
 docker rm ${ECR_REPO} || true
 
+echo "✅ MongoDB 컨테이너 실행 (필요시)"
+docker stop cluvr-mongo || true
+docker rm cluvr-mongo || true
+docker run -d --name cluvr-mongo -p 27017:27017 mongo:6.0
+
 echo "✅ 새 컨테이너 실행"
-docker run -d --name ${ECR_REPO} -p 8080:8080 --env-file .env ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
+docker run -d --name ${ECR_REPO} -p 8080:8080 --env-file ${ENV_PATH} ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
 EOF
 """
             }
