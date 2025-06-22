@@ -18,12 +18,10 @@ import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import reactor.netty.http.client.HttpClient;
 
-@Getter
 @Configuration
-@ConfigurationProperties(prefix = "openai.api")
 public class WebClientConfig {
 
-	@Value("${OPENAI_API_KEY}")
+	@Value("${openai.api.key:}")
 	private String secretKey;
 
 	private static final String BASE_URL = "https://api.openai.com/v1";
