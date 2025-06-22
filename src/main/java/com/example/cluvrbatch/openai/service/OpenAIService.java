@@ -38,7 +38,15 @@ public class OpenAIService {
 			.uri("/chat/completions") // baseUrl은 config에서 지정됨
 			.bodyValue(request)
 			.retrieve()
+			.onStatus(status -> status.isError(), response -> {
+				log.error("OpenAI API 호출 실패 - Status: {}", response.statusCode());
+				return response.bodyToMono(String.class)
+					.flatMap(errorBody -> Mono.error(new RuntimeException("OpenAI API 호출 실패: " + errorBody)));
+			})
 			.bodyToMono(ChatCompletionResponse.class)
+			.doOnSubscribe(subscription -> log.info("OpenAI API 호출 시작"))
+			.doOnNext(response -> log.info("OpenAI API 호출 성공"))
+			.doOnError(error -> log.error("OpenAI API 호출 중 오류 발생", error))
 			.map(response -> {
 				if (response.choices() == null || response.choices().isEmpty()) {
 					throw new RuntimeException("OpenAI API로부터 응답을 받지 못했습니다");
