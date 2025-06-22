@@ -40,6 +40,9 @@ public class OpenAIService {
 			.retrieve()
 			.bodyToMono(ChatCompletionResponse.class)
 			.map(response -> {
+				if (response.choices() == null || response.choices().isEmpty()) {
+					throw new RuntimeException("OpenAI API로부터 응답을 받지 못했습니다");
+				}
 				return response.choices().get(0).message().content();
 			});
 	}
