@@ -1,4 +1,4 @@
-package com.example.cluvrbatch.openAI.dto;
+package com.example.cluvrbatch.openai.dto;
 
 import lombok.Getter;
 

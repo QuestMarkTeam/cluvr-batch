@@ -1,4 +1,7 @@
-package com.example.cluvrbatch.openAI.config;
+package com.example.cluvrbatch.openai.config;
+
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 import lombok.Getter;
 

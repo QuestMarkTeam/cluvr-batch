@@ -1,4 +1,4 @@
-package com.example.cluvrbatch.openAI.controller;
+package com.example.cluvrbatch.openai.controller;
 
 import reactor.core.publisher.Mono;
 
@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.cluvrbatch.openAI.dto.GeneratePromptDto;
-import com.example.cluvrbatch.openAI.service.OpenAIService;
+import com.example.cluvrbatch.openai.dto.GeneratePromptDto;
+import com.example.cluvrbatch.openai.service.OpenAIService;
 
 @RestController
 @RequestMapping("/api/openai")

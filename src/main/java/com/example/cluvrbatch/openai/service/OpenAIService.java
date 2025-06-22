@@ -1,4 +1,4 @@
-package com.example.cluvrbatch.openAI.service;
+package com.example.cluvrbatch.openai.service;
 
 import java.util.List;
 
@@ -8,9 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.example.cluvrbatch.openAI.dto.ChatCompletionRequest;
-import com.example.cluvrbatch.openAI.dto.ChatCompletionResponse;
-import com.example.cluvrbatch.openAI.dto.ChatMessage;
+import com.example.cluvrbatch.openai.dto.ChatCompletionRequest;
+import com.example.cluvrbatch.openai.dto.ChatCompletionResponse;
+import com.example.cluvrbatch.openai.dto.ChatMessage;
 
 import reactor.core.publisher.Mono;
 
