@@ -23,7 +23,7 @@ public class OpenAIController {
 
 	@PostMapping("/chat_completion")
 	public Mono<ResponseEntity<String>> chat(@RequestBody GeneratePromptDto dto) {
-		return openAIService.generateChatCompletion(dto.getPrompt())
+		return openAIService.generateChatCompletion(dto.prompt())
 			.map(response -> ResponseEntity.ok().body(response))
 			.onErrorResume(e -> Mono.just(
 				ResponseEntity.status(HttpStatus.BAD_REQUEST)

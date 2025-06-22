@@ -1,8 +1,9 @@
 package com.example.cluvrbatch.openai.dto;
 
-import lombok.Getter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-@Getter
-public class GeneratePromptDto {
-	String prompt;
+@JsonIgnoreProperties(ignoreUnknown = true)
+public record GeneratePromptDto(
+	String prompt
+) {
 }
