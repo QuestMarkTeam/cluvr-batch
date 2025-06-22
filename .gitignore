@@ -38,5 +38,4 @@ out/
 ### Enviroment ###
 .env
 ### Spring ###
-*.yml
 *.propertise
