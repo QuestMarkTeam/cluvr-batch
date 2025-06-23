@@ -24,6 +24,7 @@
                     string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD'),
                     string(credentialsId: 'REDIS_HOST', variable: 'REDIS_HOST'),
                     string(credentialsId: 'REDIS_PORT', variable: 'REDIS_PORT')
+                    string(credentialsId: 'OPENAI_API_KEY', variable: 'OPENAI_API_KEY')
                 ]) {
                     sh """
                         echo "SPRING_DATASOURCE_URL=jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8" > .env
@@ -31,6 +32,7 @@
                         echo "SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}" >> .env
                         echo "REDIS_HOST=${REDIS_HOST}" >> .env
                         echo "REDIS_PORT=${REDIS_PORT}" >> .env
+                        echo "OPENAI_API_KEY=${OPENAI_API_KEY}" >> .env
 
                         scp -o StrictHostKeyChecking=no -i /var/lib/jenkins/.ssh/id_rsa .env ubuntu@${EC2_IP}:${ENV_PATH}
                     """
