@@ -78,7 +78,7 @@ docker rm cluvr-mongo || true
 docker run -d --name cluvr-mongo -p 27017:27017 mongo:6.0
 
 echo "✅ 새 컨테이너 실행"
-docker run -d --name ${ECR_REPO} -p 8080:8080 --env-file ${ENV_PATH} ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
+docker run -d --name ${ECR_REPO} -p 80:80 --env-file ${ENV_PATH} ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
 EOF
 """
             }
