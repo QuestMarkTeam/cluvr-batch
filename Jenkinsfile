@@ -23,7 +23,7 @@
                     string(credentialsId: 'DB_USERNAME', variable: 'DB_USERNAME'),
                     string(credentialsId: 'DB_PASSWORD', variable: 'DB_PASSWORD'),
                     string(credentialsId: 'REDIS_HOST', variable: 'REDIS_HOST'),
-                    string(credentialsId: 'REDIS_PORT', variable: 'REDIS_PORT')
+                    string(credentialsId: 'REDIS_PORT', variable: 'REDIS_PORT'),
                     string(credentialsId: 'OPENAI_API_KEY', variable: 'OPENAI_API_KEY')
                 ]) {
                     sh """
