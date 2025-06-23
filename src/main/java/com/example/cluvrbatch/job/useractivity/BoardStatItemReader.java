@@ -28,40 +28,48 @@ public class BoardStatItemReader implements ItemReader<BoardStatEventResponseDto
 	@Override
 	public BoardStatEventResponseDto read() throws Exception {
 		if (cached.isEmpty()) {
-			Set<String> keys = redisTemplate.keys(RedisKey.BOARD_ACTIVITY_LOG.getKey() + "*");
+			try {
+				Set<String> keys = redisTemplate.keys(RedisKey.BOARD_ACTIVITY_LOG.getKey() + "*");
 
-			for (String key : keys) {
-				Map<Object, Object> statMap = redisTemplate.opsForHash().entries(key);
+				for (String key : keys) {
+					Map<Object, Object> statMap = redisTemplate.opsForHash().entries(key);
 
-				if (statMap.isEmpty())
-					continue;
+					if (statMap.isEmpty())
+						continue;
 
-				Long userId = Long.parseLong(key.substring(key.lastIndexOf(":") + 1));
-				String raw = (String)statMap.get(RedisKey.USER_TIER.getKey());
-				String cleaned = raw.replace("\"", "");
-				Tier tier = Tier.valueOf(cleaned);
-				BoardStatEventResponseDto dto = BoardStatEventResponseDto.of(
-					userId,
-					Integer.parseInt((String)statMap.get(RedisKey.TOTAL_ANSWER.getKey())),
-					Integer.parseInt((String)statMap.get(RedisKey.TOTAL_SELECTED.getKey())),
-					Integer.parseInt((String)statMap.get(RedisKey.TOTAL_QUESTION.getKey())),
-					Integer.parseInt((String)statMap.get(RedisKey.TOTAL_CLOVER.getKey())),
-					tier
-				);
+					Long userId = Long.parseLong(key.substring(key.lastIndexOf(":") + 1));
+					String raw = (String) statMap.get(RedisKey.USER_TIER.getKey());
+					String cleaned = raw.replace("\"", "");
+					Tier tier = Tier.valueOf(cleaned);
 
-				Tier updatedTier = Tier.checkAndUpgrade(
-					dto.getTier().getRevel(),
-					dto.getTotalClover(),
-					dto.getTotalQuestion(),
-					dto.getTotalAnswer()
-				);
-				dto.updateTier(updatedTier);
+					BoardStatEventResponseDto dto = BoardStatEventResponseDto.of(
+						userId,
+						Integer.parseInt((String) statMap.get(RedisKey.TOTAL_ANSWER.getKey())),
+						Integer.parseInt((String) statMap.get(RedisKey.TOTAL_SELECTED.getKey())),
+						Integer.parseInt((String) statMap.get(RedisKey.TOTAL_QUESTION.getKey())),
+						Integer.parseInt((String) statMap.get(RedisKey.TOTAL_CLOVER.getKey())),
+						tier
+					);
 
-				cached.add(dto);
-				redisTemplate.delete(key);
+					Tier updatedTier = Tier.checkAndUpgrade(
+						dto.getTier().getRevel(),
+						dto.getTotalClover(),
+						dto.getTotalQuestion(),
+						dto.getTotalAnswer()
+					);
+					dto.updateTier(updatedTier);
+
+					cached.add(dto);
+					redisTemplate.delete(key);
+				}
+			} catch (Exception e) {
+				System.err.println("Redis 접근 중 예외 발생: " + e.getMessage());
+				// e.printStackTrace(); // 필요시 로그 자세히 출력
+				return null; // → Batch는 종료되지만 서버는 죽지 않음
 			}
 		}
 
 		return cached.poll();
 	}
+
 }
