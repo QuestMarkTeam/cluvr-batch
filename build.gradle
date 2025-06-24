@@ -19,7 +19,6 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
@@ -27,16 +26,20 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'io.lettuce:lettuce-core'
 
-    implementation 'mysql:mysql-connector-java:8.0.29'
+
 
     // Runtime-only JDBC drivers
     runtimeOnly 'com.h2database:h2'
-    implementation 'com.mysql:mysql-connector-j'
+    implementation 'mysql:mysql-connector-java:8.0.29'
     // jpa
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     // Spring Batch
     implementation 'org.springframework.boot:spring-boot-starter-batch'
     implementation 'org.springframework.batch:spring-batch-core:5.1.0'
+    // Quartz
+    implementation 'org.springframework.boot:spring-boot-starter-quartz'
+    implementation 'org.springframework:spring-context-support'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     // jackson
     implementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310' // LocalDateTime 직렬화
