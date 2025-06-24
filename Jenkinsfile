@@ -79,14 +79,14 @@ docker stop cluvr-mongo || true
 docker rm cluvr-mongo || true
 docker run -d --name cluvr-mongo -p 27017:27017 mongo:6.0
 
-echo "✅ 새 컨테이너 실행"
-docker run -d --name ${ECR_REPO} \
+echo "✅ 새 컨테이너 실행 (nohup으로 세션 독립)"
+nohup docker run -d --name ${ECR_REPO} \
   -p 80:8080 \
   --env-file ${ENV_PATH} \
   --log-driver json-file \
   --log-opt max-size=10m \
   --log-opt max-file=3 \
-  ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
+  ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG} > /home/ubuntu/${ECR_REPO}_run.log 2>&1 &
 EOF
 """
             }
