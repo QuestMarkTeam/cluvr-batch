@@ -87,7 +87,7 @@ docker run -d --name cluvr-mongo -p 27017:27017 mongo:6.0
 
 echo "✅ 새 컨테이너 실행"
 docker run -d --name \$ECR_REPO \\
-  -p 80:8080 \\
+  --network host \\
   --env-file \$ENV_PATH \\
   --log-driver json-file \\
   --log-opt max-size=10m \\

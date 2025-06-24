@@ -8,5 +8,7 @@ RUN gradle bootJar
 FROM openjdk:17
 WORKDIR /app
 COPY --from=builder /app/build/libs/cluvr-batch-0.0.1-SNAPSHOT.jar app.jar
-EXPOSE 8080
+# 포트 80으로 노출
+EXPOSE 80
+
 ENTRYPOINT ["java", "-jar", "app.jar"]

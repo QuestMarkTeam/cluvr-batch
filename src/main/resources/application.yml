@@ -1,7 +1,7 @@
 server:
   error:
     include-message: always
-  port: 8080
+  port: 80
 spring:
   application:
     name: cluvr
@@ -9,6 +9,8 @@ spring:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
+      ssl:
+        enabled: true
     mongodb:
       host: cluvr-mongo
       port: 27017
