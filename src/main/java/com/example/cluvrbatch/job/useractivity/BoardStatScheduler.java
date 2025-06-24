@@ -32,7 +32,9 @@ public class BoardStatScheduler {
 
 			boardStatJobService.runJob();
 		} catch (Exception e) {
-			throw new IllegalStateException("runBoardStatJob 실행 실패 이게 꿈이라면 어서 날 깨워줘 모든 것이 거짓말이라고 해줘", e);
+
+			log.info("runBoardStatJob 실행 실패 이게 꿈이라면 어서 날 깨워줘 모든 것이 거짓말이라고 해줘", e);
+
 		}
 	}
 
