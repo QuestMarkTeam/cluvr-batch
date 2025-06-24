@@ -61,32 +61,38 @@
 
         stage('Deploy to EC2') {
             steps {
-                echo '✅ Deploying on remote EC2...'
-                sh """
-ssh -o StrictHostKeyChecking=no -i /var/lib/jenkins/.ssh/id_rsa ubuntu@${EC2_IP} << 'EOF'
+        echo '✅ Deploying on remote EC2...'
+        sh """
+ssh -o StrictHostKeyChecking=no -i /var/lib/jenkins/.ssh/id_rsa ubuntu@${EC2_IP} << EOF
+AWS_REGION="${AWS_REGION}"
+ECR_REGISTRY="${ECR_REGISTRY}"
+ECR_REPO="${ECR_REPO}"
+IMAGE_TAG="${IMAGE_TAG}"
+ENV_PATH="${ENV_PATH}"
+
 echo "✅ ECR 로그인"
-aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}
+aws ecr get-login-password --region \$AWS_REGION | docker login --username AWS --password-stdin \$ECR_REGISTRY
 
 echo "✅ 최신 Docker 이미지 pull"
-docker pull ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}
+docker pull \$ECR_REGISTRY/\$ECR_REPO:\$IMAGE_TAG
 
 echo "✅ 기존 컨테이너 중지 및 제거"
-docker stop ${ECR_REPO} || true
-docker rm ${ECR_REPO} || true
+docker stop \$ECR_REPO || true
+docker rm \$ECR_REPO || true
 
 echo "✅ MongoDB 컨테이너 실행 (필요시)"
 docker stop cluvr-mongo || true
 docker rm cluvr-mongo || true
 docker run -d --name cluvr-mongo -p 27017:27017 mongo:6.0
 
-echo "✅ 새 컨테이너 실행 (nohup으로 세션 독립)"
-nohup docker run -d --name ${ECR_REPO} \
-  -p 80:8080 \
-  --env-file ${ENV_PATH} \
-  --log-driver json-file \
-  --log-opt max-size=10m \
-  --log-opt max-file=3 \
-  ${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG} > /home/ubuntu/${ECR_REPO}_run.log 2>&1 &
+echo "✅ 새 컨테이너 실행"
+docker run -d --name \$ECR_REPO \\
+  -p 80:8080 \\
+  --env-file \$ENV_PATH \\
+  --log-driver json-file \\
+  --log-opt max-size=10m \\
+  --log-opt max-file=3 \\
+  \$ECR_REGISTRY/\$ECR_REPO:\$IMAGE_TAG
 EOF
 """
             }
