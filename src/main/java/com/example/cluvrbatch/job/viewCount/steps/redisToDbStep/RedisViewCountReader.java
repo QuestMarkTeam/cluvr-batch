@@ -5,12 +5,14 @@ import java.util.Queue;
 import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.batch.item.ItemReader;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import com.example.cluvrbatch.job.viewCount.dto.BoardViewCount;
 
+@Slf4j
 @RequiredArgsConstructor
 public class RedisViewCountReader implements ItemReader<BoardViewCount> {
 
@@ -34,7 +36,7 @@ public class RedisViewCountReader implements ItemReader<BoardViewCount> {
 						Long boardId = extractBoardIdFromKey(key);
 						cache.add(new BoardViewCount(boardId, viewCount));
 					} catch (NumberFormatException e) {
-						System.err.println("Invalid value or key: " + key + " -> " + viewCount);
+						log.warn("Invalid value or key: {} -> {}", key, viewCount);
 					}
 				}
 			}
@@ -48,6 +50,9 @@ public class RedisViewCountReader implements ItemReader<BoardViewCount> {
 	private Long extractBoardIdFromKey(String key) {
 		// 예: "board:9:views" -> 9
 		String[] parts = key.split(":");
+		if (parts.length != 3 || !"board".equals(parts[0]) || !"views".equals(parts[2])) {
+			throw new IllegalArgumentException("Invalid key format: " + key);
+		}
 		return Long.valueOf(parts[1]);
 	}
 }

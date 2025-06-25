@@ -17,9 +17,10 @@ public class RedisConfig {
 		RedisTemplate<String, Long> template = new RedisTemplate<>();
 		template.setConnectionFactory(connectionFactory);
 
-		// (선택) Key, Value serializer 설정
-		template.setKeySerializer(new StringRedisSerializer());
-		template.setValueSerializer(new GenericToStringSerializer<>(Long.class));
+		template.setHashKeySerializer(new StringRedisSerializer());
+		template.setHashValueSerializer(new GenericToStringSerializer<>(Long.class));
+
+		template.afterPropertiesSet();
 
 		return template;
 	}
