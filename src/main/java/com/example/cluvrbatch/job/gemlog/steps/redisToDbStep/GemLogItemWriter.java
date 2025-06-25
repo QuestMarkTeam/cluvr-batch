@@ -1,4 +1,4 @@
-package com.example.cluvrbatch.job.gemlog;
+package com.example.cluvrbatch.job.gemlog.steps.redisToDbStep;
 
 import lombok.RequiredArgsConstructor;
 

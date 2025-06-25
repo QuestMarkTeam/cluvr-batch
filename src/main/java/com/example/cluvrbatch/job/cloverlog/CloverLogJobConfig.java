@@ -14,6 +14,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.example.cluvrbatch.job.cloverlog.dto.CloverEventResponseDto;
+import com.example.cluvrbatch.job.cloverlog.steps.redisToDbStep.CloverLogItemReader;
+import com.example.cluvrbatch.job.cloverlog.steps.redisToDbStep.CloverLogItemWriter;
 import com.example.cluvrbatch.job.enums.JobStepName;
 
 @Configuration

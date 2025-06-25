@@ -15,6 +15,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import com.example.cluvrbatch.job.enums.JobStepName;
 import com.example.cluvrbatch.job.gemlog.dto.GemEventResponseDto;
+import com.example.cluvrbatch.job.gemlog.steps.redisToDbStep.GemLogItemReader;
+import com.example.cluvrbatch.job.gemlog.steps.redisToDbStep.GemLogItemWriter;
 
 @Configuration
 @RequiredArgsConstructor

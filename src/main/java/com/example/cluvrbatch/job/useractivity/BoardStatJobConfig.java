@@ -15,6 +15,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import com.example.cluvrbatch.job.enums.JobStepName;
 import com.example.cluvrbatch.job.useractivity.dto.BoardStatEventResponseDto;
+import com.example.cluvrbatch.job.useractivity.steps.redisToDbStep.BoardStatItemReader;
+import com.example.cluvrbatch.job.useractivity.steps.redisToDbStep.BoardStatItemWriter;
 
 @Configuration
 @RequiredArgsConstructor
