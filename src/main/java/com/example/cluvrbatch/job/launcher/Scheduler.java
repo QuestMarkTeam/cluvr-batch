@@ -19,6 +19,7 @@ public class Scheduler {
 	private final Job boardLogJob;
 	private final Job gemLogJob;
 	private final Job cloverLogJob;
+	private final Job reviewRequestJob;
 
 	@Scheduled(cron = "0 0 3 * * *") // 매일 3시
 	public void runViewCountJob() throws Exception {
@@ -64,6 +65,18 @@ public class Scheduler {
 			log.info("✅ [SUCCESS] cloverLogJob");
 		} catch (Exception e) {
 			log.error("❌ [FAIL] cloverLogJob", e);
+			throw e;
+		}
+	}
+
+	@Scheduled(cron = "0 0 4 * * MON")
+	public void runReviewRequestJob() throws Exception {
+		try {
+			log.info("▶ [START] reviewRequestJob");
+			jobLauncher.run(reviewRequestJob, params());
+			log.info("✅ [SUCCESS] reviewRequestJob");
+		} catch (Exception e) {
+			log.error("❌ [FAIL] reviewRequestJob", e);
 			throw e;
 		}
 	}
