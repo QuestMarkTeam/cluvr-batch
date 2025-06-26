@@ -18,6 +18,7 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
@@ -25,13 +26,13 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'io.lettuce:lettuce-core'
 
-
-
     // Runtime-only JDBC drivers
     runtimeOnly 'com.h2database:h2'
     implementation 'mysql:mysql-connector-java:8.0.29'
+
     // jpa
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
     // Spring Batch
     implementation 'org.springframework.boot:spring-boot-starter-batch'
     implementation 'org.springframework.batch:spring-batch-core:5.1.0'
@@ -52,6 +53,11 @@ dependencies {
     // Env
     implementation 'io.github.cdimascio:dotenv-java:3.0.0'
     implementation 'org.slf4j:slf4j-api:2.0.9'
+
+    // Test - Prometheus
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-core'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
 }
 
 tasks.named('test') {
