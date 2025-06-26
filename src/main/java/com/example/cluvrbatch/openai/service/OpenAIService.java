@@ -53,31 +53,50 @@ public class OpenAIService {
 			0.2
 		);
 
-		return openAIWebClient.post()
-			.uri("/chat/completions")
-			.bodyValue(request)
-			.retrieve()
+		return openAIWebClient.post()           // 1-1. HTTP POST 요청 시작
+			.uri("/chat/completions")        	// 1-2. 호출할 OpenAI API 경로 설정
+			.bodyValue(request)                	// 1-3. 요청 바디에 request 객체 삽입
+			.retrieve()                        	// 1-4. 응답 수신 준비
+
+			// 2. 에러 상태 코드 처리 (4xx, 5xx 등)
 			.onStatus(status -> status.isError(), response -> {
 				log.error("OpenAI API 호출 실패 - Status: {}", response.statusCode());
 				return response.bodyToMono(String.class)
 					.flatMap(errorBody -> Mono.error(new RuntimeException("OpenAI API 호출 실패: " + errorBody)));
 			})
+
+			// 3. 정상 응답 본문을 ChatCompletionResponse 클래스 로 변환
 			.bodyToMono(ChatCompletionResponse.class)
+			// 요청 시작 로그 출력
 			.doOnSubscribe(sub -> log.info("OpenAI API 호출 시작"))
+			// 요청 수신 성공 로그 출력
 			.doOnNext(res -> log.info("OpenAI API 호출 성공"))
+
+			// 4. 응답에서 실제 텍스트(content) 추출
 			.map(response -> {
 				if (response.choices() == null || response.choices().isEmpty()) {
 					throw new RuntimeException("OpenAI API로부터 응답을 받지 못했습니다");
 				}
-				return response.choices().get(0).message().content(); // String
+				return response.choices().get(0).message().content();
 			})
-			.map(ReviewResultDto::parseReviewResult) // 여기서 파싱
+
+			// 5. content 문자열을 ReviewResultDto 객체로 파싱
+			.map(ReviewResultDto::parseReviewResult)
+
+			// 실패 시 재시도 로직 (최대 3번, 2초 간격의 지수 백오프)
 			.retryWhen(Retry.backoff(3, Duration.ofSeconds(2))
 				.filter(throwable -> {
-					log.warn("파싱 또는 OpenAI 응답 오류로 재시도: {}", throwable.getMessage());
-					return true;
+					boolean shouldRetry = !(throwable instanceof IllegalArgumentException);
+					if (shouldRetry) {
+						log.warn("일시적 오류로 재시도: {}", throwable.getMessage());
+					} else {
+						log.error("재시도 불가능한 오류: {}", throwable.getMessage());
+					}
+					return shouldRetry;
 				})
 			)
-			.doOnError(error -> log.error("최종 실패: 파싱 또는 OpenAI API 오류", error));
+
+			// 최종 실패 시 로그 출력
+			.doOnError(error -> log.error("최종 실패: 파싱 또는 OpenAI API 오류, 확인이 필요합니다.", error));
 	}
 }
