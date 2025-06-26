@@ -1,9 +1,10 @@
 package com.example.cluvrbatch.job.reviewRequest.steps;
 
 import java.util.List;
-import java.util.function.Function;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import javax.sql.DataSource;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,10 +17,7 @@ import org.springframework.stereotype.Component;
 import com.example.cluvrbatch.job.reviewRequest.dto.ReviewRequestDto;
 import com.example.cluvrbatch.openai.service.OpenAIService;
 
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import javax.sql.DataSource;
 
 @Slf4j
 @Component
@@ -28,19 +26,6 @@ public class ReviewRequestWriter implements ItemWriter<ReviewRequestDto> {
 
 	private final OpenAIService openAIService;
 	private final DataSource dataSource;
-
-	// @Bean
-	// public ItemWriter<ReviewRequestDto> reviewRequestWriter(DataSource dataSource) {
-	// 	JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-	// 	return items -> {
-	// 		for (ReviewRequestDto item : items) {
-	// 			jdbcTemplate.update(
-	// 				"UPDATE til_reviews SET reviewed = ?, feedback = ?, score = ?, summary = ? WHERE id = ?",
-	// 				item.getReviewed(), item.getFeedback(), item.getScore(), item.getSummary(), item.getId()
-	// 			);
-	// 		}
-	// 	};
-	// }
 
 	@Override
 	public void write(Chunk<? extends ReviewRequestDto> chunk) throws Exception {
@@ -57,6 +42,7 @@ public class ReviewRequestWriter implements ItemWriter<ReviewRequestDto> {
 						item.setReviewed(true);
 					})
 
+					// 호출 성공 시
 					.flatMap(result ->
 						Mono.fromRunnable(() -> {
 							jdbcTemplate.update(
@@ -67,16 +53,28 @@ public class ReviewRequestWriter implements ItemWriter<ReviewRequestDto> {
 						}).then()
 					)
 
+					// 호출 실패 시
 					.onErrorResume(e -> {
 						log.warn("AI 호출 실패, ID: {}", item.getId(), e);
-						return Mono.empty();
+						item.setFeedback("[AI Failed] 피드백 생성 실패");
+						item.setSummary("[AI Failed] 요약 생성 실패");
+						item.setScore(0);
+						item.setReviewed(true);
+						return Mono.fromRunnable(() -> {
+							jdbcTemplate.update(
+								"UPDATE til_reviews SET reviewed = ?, feedback = ?, score = ?, summary = ? WHERE id = ?",
+								item.getReviewed(), item.getFeedback(), item.getScore(), item.getSummary(), item.getId()
+							);
+						}).then();
 					})
+
 			)
 			.collect(Collectors.toList());
 
-		Flux.fromIterable(tasks)
-			.flatMap(Function.identity(), 5) // 병렬 제한
-			.then()
-			.block();
+		CompletableFuture.allOf(
+			tasks.stream()
+				.map(mono -> mono.toFuture())
+				.toArray(CompletableFuture[]::new)
+		).get();
 	}
 }
