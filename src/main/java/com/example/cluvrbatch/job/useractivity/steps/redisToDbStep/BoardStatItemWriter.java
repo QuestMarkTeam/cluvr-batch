@@ -1,4 +1,4 @@
-package com.example.cluvrbatch.job.useractivity;
+package com.example.cluvrbatch.job.useractivity.steps.redisToDbStep;
 
 import lombok.RequiredArgsConstructor;
 
