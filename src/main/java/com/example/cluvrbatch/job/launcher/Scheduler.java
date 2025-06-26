@@ -69,7 +69,7 @@ public class Scheduler {
 		}
 	}
 
-	@Scheduled(cron = "0 0 3 * * MON")
+	@Scheduled(cron = "0 0 4 * * MON")
 	public void runReviewRequestJob() throws Exception {
 		try {
 			log.info("▶ [START] reviewRequestJob");
