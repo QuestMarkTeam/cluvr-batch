@@ -14,8 +14,10 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.cluvrbatch.job.reviewRequest.dto.ReviewRequestDto;
+import com.example.cluvrbatch.job.reviewRequest.entity.TilReview;
 import com.example.cluvrbatch.job.reviewRequest.repository.TilReviewRepository;
 import com.example.cluvrbatch.openai.service.OpenAIService;
 
@@ -29,6 +31,7 @@ public class ReviewRequestTasklet implements Tasklet {
 	private final JdbcTemplate jdbcTemplate;
 
 	@Override
+	@Transactional
 	public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
 		// 1. 리뷰할 TIL들 불러오기
 		List<ReviewRequestDto> requests = tilReviewRepository.findAllByReviewedIsFalse();
@@ -62,9 +65,16 @@ public class ReviewRequestTasklet implements Tasklet {
 	}
 
 	private Mono<Void> updateToDb(ReviewRequestDto item) {
-		return Mono.fromRunnable(() -> jdbcTemplate.update(
-			"UPDATE til_reviews SET reviewed = ?, feedback = ?, score = ?, summary = ? WHERE id = ?",
-			item.getReviewed(), item.getFeedback(), item.getScore(), item.getSummary(), item.getId()
-		));
+		return Mono.fromRunnable(() -> {
+			TilReview review = tilReviewRepository.findById(item.getId())
+				.orElseThrow(() -> new IllegalArgumentException("리뷰 엔티티를 찾을 수 없습니다. ID=" + item.getId()));
+
+			review.updateFeedback(item.getFeedback());
+			review.updateSummary(item.getSummary());
+			review.updateScore(item.getScore());
+			review.updateReviewed(item.getReviewed());
+
+			tilReviewRepository.save(review); // 변경 감지 + save
+		});
 	}
 }

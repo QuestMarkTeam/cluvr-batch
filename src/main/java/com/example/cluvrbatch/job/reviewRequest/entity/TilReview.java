@@ -1,13 +1,9 @@
 package com.example.cluvrbatch.job.reviewRequest.entity;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,5 +28,21 @@ public class TilReview {
 	private String summary;
 
 	private int score;
+
+	public void updateReviewed(boolean reviewed) {
+		this.reviewed = reviewed;
+	}
+
+	public void updateFeedback(String feedback) {
+		this.feedback = feedback;
+	}
+
+	public void updateSummary(String summary) {
+		this.summary = summary;
+	}
+
+	public void updateScore(int score) {
+		this.score = score;
+	}
 }
 
