@@ -10,7 +10,7 @@ import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import com.example.cluvrbatch.job.gemlog.dto.GemEventResponseDto;
+import com.example.cluvrbatch.job.gemlog.dto.GemLogDto;
 
 @RequiredArgsConstructor
 @Repository
@@ -18,7 +18,7 @@ public class GemLogJdbcRepository {
 
 	private final JdbcTemplate jdbcTemplate;
 
-	public void batchInsert(List<? extends GemEventResponseDto> items) {
+	public void batchInsert(List<? extends GemLogDto> items) {
 		String sql = "INSERT INTO gem_log (user_id, amount, description, created_at, deleted_at, flow_type, action) " +
 			"VALUES (?, ?, ?, ?, ?, ?, ?)";
 
@@ -26,7 +26,7 @@ public class GemLogJdbcRepository {
 
 			@Override
 			public void setValues(PreparedStatement ps, int i) throws SQLException {
-				GemEventResponseDto dto = items.get(i);
+				GemLogDto dto = items.get(i);
 
 				ps.setLong(1, dto.getUserId());
 				ps.setInt(2, dto.getAmount());

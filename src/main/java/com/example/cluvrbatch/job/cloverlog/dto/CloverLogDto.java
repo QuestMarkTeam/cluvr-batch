@@ -11,7 +11,7 @@ import com.example.cluvrbatch.job.cloverlog.enums.CloverActionType;
 
 @NoArgsConstructor(access = PROTECTED)
 @Getter
-public class CloverEventResponseDto { // redis에 올릴 데이터
+public class CloverLogDto { // redis에 올릴 데이터
 
 	private Long userId;
 	private Integer amount;
@@ -21,7 +21,7 @@ public class CloverEventResponseDto { // redis에 올릴 데이터
 	private String action; // 어떤 활동으로 적립인지
 	private CloverActionType flowType; // 사용인지 적립인지
 
-	public CloverEventResponseDto(Integer amount, LocalDateTime createdAt, LocalDateTime deletedAt, String description,
+	public CloverLogDto(Integer amount, LocalDateTime createdAt, LocalDateTime deletedAt, String description,
 		Long userId, String action, CloverActionType flowType) {
 		this.amount = amount;
 		this.createdAt = createdAt;
@@ -32,9 +32,9 @@ public class CloverEventResponseDto { // redis에 올릴 데이터
 		this.flowType = flowType;
 	}
 
-	public static CloverEventResponseDto of(Integer amount, LocalDateTime createdAt, LocalDateTime deletedAt,
+	public static CloverLogDto of(Integer amount, LocalDateTime createdAt, LocalDateTime deletedAt,
 		String description, Long userId, String action, CloverActionType flowType) {
-		return new CloverEventResponseDto(amount, createdAt, deletedAt, description, userId, action,
+		return new CloverLogDto(amount, createdAt, deletedAt, description, userId, action,
 			flowType);
 	}
 

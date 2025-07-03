@@ -9,7 +9,7 @@ import com.example.cluvrbatch.job.useractivity.enums.Tier;
 
 @NoArgsConstructor(access = PROTECTED)
 @Getter
-public class BoardStatEventResponseDto { // redis에 올릴 데이터
+public class BoardStatDto { // redis에 올릴 데이터
 
 	private Long userId;
 	private Integer totalAnswer;
@@ -18,7 +18,7 @@ public class BoardStatEventResponseDto { // redis에 올릴 데이터
 	private Integer totalQuestion;
 	private Tier tier;
 
-	public BoardStatEventResponseDto(Long userId, Integer totalAnswer, Integer totalClover, Integer totalSelected,
+	public BoardStatDto(Long userId, Integer totalAnswer, Integer totalClover, Integer totalSelected,
 		Integer totalQuestion, Tier tier) {
 		this.userId = userId;
 		this.totalAnswer = totalAnswer;
@@ -28,10 +28,10 @@ public class BoardStatEventResponseDto { // redis에 올릴 데이터
 		this.tier = tier;
 	}
 
-	public static BoardStatEventResponseDto of(Long userId, Integer totalAnswer, Integer totalClover,
+	public static BoardStatDto of(Long userId, Integer totalAnswer, Integer totalClover,
 		Integer totalSelected,
 		Integer totalQuestion, Tier tier) {
-		return new BoardStatEventResponseDto(userId, totalAnswer, totalClover, totalSelected, totalQuestion, tier);
+		return new BoardStatDto(userId, totalAnswer, totalClover, totalSelected, totalQuestion, tier);
 	}
 
 	public void updateTier(Tier tier) {

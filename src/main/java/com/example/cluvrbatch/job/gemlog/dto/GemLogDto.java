@@ -11,7 +11,7 @@ import com.example.cluvrbatch.job.gemlog.enums.GemActionType;
 
 @NoArgsConstructor(access = PROTECTED)
 @Getter
-public class GemEventResponseDto {
+public class GemLogDto {
 	private Long userId;
 	private Integer amount;
 	private String description;
@@ -21,7 +21,7 @@ public class GemEventResponseDto {
 	private String action;
 
 	// 30일간 기준으로 최신 gem 로그를 보여주기위해 레디스에 저장
-	public GemEventResponseDto(Long userId, Integer amount, String description, LocalDateTime createdAt,
+	public GemLogDto(Long userId, Integer amount, String description, LocalDateTime createdAt,
 		LocalDateTime deletedAt, GemActionType flowType, String action) {
 		this.userId = userId;
 		this.amount = amount;
@@ -32,9 +32,9 @@ public class GemEventResponseDto {
 		this.action = action;
 	}
 
-	public static GemEventResponseDto of(Long userId, Integer amount, String description, LocalDateTime createdAt,
+	public static GemLogDto of(Long userId, Integer amount, String description, LocalDateTime createdAt,
 		LocalDateTime deletedAt, GemActionType flowType, String action) {
-		return new GemEventResponseDto(userId, amount, description, createdAt, deletedAt, flowType,
+		return new GemLogDto(userId, amount, description, createdAt, deletedAt, flowType,
 			action);
 	}
 }
