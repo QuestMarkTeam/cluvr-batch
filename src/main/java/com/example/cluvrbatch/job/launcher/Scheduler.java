@@ -20,8 +20,22 @@ public class Scheduler {
 	private final Job gemLogJob;
 	private final Job cloverLogJob;
 	private final Job reviewRequestJob;
+	private final Job reactionCountJob;
 
-	@Scheduled(cron = "0 0 3 * * *") // 매일 3시
+	@Scheduled(cron = "0 5 2 * * *") //오전 2시 5분에 실행
+	public void runReactionCountJob() throws Exception {
+		try {
+			log.info("▶ [START] reactionCountJob");
+			jobLauncher.run(reactionCountJob, params());
+			log.info("✅ [SUCCESS] reactionCountJob");
+		} catch (Exception e) {
+			log.error("❌ [FAIL] reactionCountJob", e);
+			throw e;
+		}
+	}
+
+	@Scheduled(cron = "0 0 3 * * *") //오전 3시에 실행
+	// @Scheduled(fixedRate = 600000) //10분에 한번씩
 	public void runViewCountJob() throws Exception {
 		try {
 			log.info("▶ [START] viewCountJob");

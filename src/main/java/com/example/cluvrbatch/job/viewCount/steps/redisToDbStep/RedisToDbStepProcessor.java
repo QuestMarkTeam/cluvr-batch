@@ -1,10 +1,17 @@
 package com.example.cluvrbatch.job.viewCount.steps.redisToDbStep;
 
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.batch.item.ItemProcessor;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import com.example.cluvrbatch.job.viewCount.dto.BoardViewCount;
 
-public class ViewCountProcessor implements ItemProcessor<BoardViewCount, BoardViewCount> {
+@RequiredArgsConstructor
+public class RedisToDbStepProcessor implements ItemProcessor<BoardViewCount, BoardViewCount> {
+
+	private final RedisTemplate<String, Long> redisTemplate;
+
 	@Override
 	public BoardViewCount process(BoardViewCount item) {
 		// 예: 조회수가 0 이상인 경우만 처리

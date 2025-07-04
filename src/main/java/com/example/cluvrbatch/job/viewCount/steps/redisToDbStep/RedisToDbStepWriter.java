@@ -9,7 +9,7 @@ import com.example.cluvrbatch.job.viewCount.dto.BoardViewCount;
 import com.example.cluvrbatch.job.viewCount.repository.BoardJdbcRepository;
 
 @RequiredArgsConstructor
-public class ViewCountWriter implements ItemWriter<BoardViewCount> {
+public class RedisToDbStepWriter implements ItemWriter<BoardViewCount> {
 	private final BoardJdbcRepository boardJdbcRepository;
 
 	@Override
