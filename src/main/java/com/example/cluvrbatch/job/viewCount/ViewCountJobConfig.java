@@ -6,19 +6,21 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@RequiredArgsConstructor
 public class ViewCountJobConfig {
-	private final JobRepository jobRepository;
-	private final Step viewCountStep;
-
 	@Bean
-	public Job viewCountJob() {
+	public Job viewCountJob(
+		JobRepository jobRepository,
+		@Qualifier("viewCountStep") Step viewCountStep,
+		@Qualifier("deleteDataOfRedisStep") Step deleteViewCountDataStep
+	) {
 		return new JobBuilder("viewCountJob", jobRepository)
 			.start(viewCountStep)
+			.next(deleteViewCountDataStep)
 			.build();
 	}
 }
