@@ -1,4 +1,4 @@
-package com.example.cluvrbatch.job.reactionCount.steps.RemoveRedisDataStep;
+package com.example.cluvrbatch.job.reactionCount.steps.removeRedisDataStep;
 
 import java.util.Set;
 
@@ -9,7 +9,6 @@ import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 
 @RequiredArgsConstructor
 public class CustomTasklet implements Tasklet {

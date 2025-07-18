@@ -7,25 +7,34 @@ spring:
     name: cluvr
   data:
     redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
-      ssl:
-        enabled: true
+      host: localhost
+      port: 6379
+#      host: ${REDIS_HOST}
+#      port: ${REDIS_PORT}
+#    mongodb:
+#      host: cluvr-mongo
+#      port: 27017
+#      database: cluvr
+#      ssl:
+#        enabled: true
     mongodb:
       host: cluvr-mongo
       port: 27017
       database: cluvr
   batch:
     job:
-      enabled: false  # 앱 실행 시 자동 실행 방지 (직접 JobLauncher 사용하기 위함)
+      enabled: true  # 앱 실행 시 자동 실행 방지 (직접 JobLauncher 사용하기 위함)
     jdbc:
       initialize-schema: always  # 개발 환경에서는 메타테이블 자동 생성
 
   datasource:
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    username: yong311
+    password: yong311
+    #    username: ${DB_USERNAME}
+    #    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8
+    #    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8
+    url: jdbc:mysql://localhost:3306/query?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8
 
   jpa:
     hibernate:

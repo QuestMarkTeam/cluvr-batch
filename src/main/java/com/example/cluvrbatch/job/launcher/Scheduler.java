@@ -21,6 +21,19 @@ public class Scheduler {
 	private final Job cloverLogJob;
 	private final Job reviewRequestJob;
 	private final Job reactionCountJob;
+	private final Job popularBoardJob;
+
+	@Scheduled(cron = "0 * * * * *") // 매 분 0초에 실행
+	public void runPopularBoardJob() throws Exception {
+		try {
+			log.info("▶ [START] popularBoardJob");
+			jobLauncher.run(popularBoardJob, params());
+			log.info("✅ [SUCCESS] popularBoardJob");
+		} catch (Exception e) {
+			log.error("❌ [FAIL] popularBoardJob", e);
+			throw e;
+		}
+	}
 
 	@Scheduled(cron = "0 5 2 * * *") //오전 2시 5분에 실행
 	public void runReactionCountJob() throws Exception {

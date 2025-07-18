@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import com.example.cluvrbatch.job.reactionCount.steps.RemoveRedisDataStep.CustomTasklet;
+import com.example.cluvrbatch.job.reactionCount.steps.removeRedisDataStep.CustomTasklet;
 
 @Configuration
 @RequiredArgsConstructor
