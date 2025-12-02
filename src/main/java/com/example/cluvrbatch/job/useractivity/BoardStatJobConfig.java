@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.example.cluvrbatch.job.enums.JobStepName;
-import com.example.cluvrbatch.job.useractivity.dto.BoardStatEventResponseDto;
+import com.example.cluvrbatch.job.useractivity.dto.BoardStatDto;
 import com.example.cluvrbatch.job.useractivity.steps.redisToDbStep.BoardStatItemReader;
 import com.example.cluvrbatch.job.useractivity.steps.redisToDbStep.BoardStatItemWriter;
 
@@ -33,14 +33,4 @@ public class BoardStatJobConfig {
 			.build();
 	}
 
-	@Bean
-	public Step boardEventStep(JobRepository jobRepository, PlatformTransactionManager transactionManager,
-		ItemReader<BoardStatEventResponseDto> reader,
-		ItemWriter<BoardStatEventResponseDto> writer) { // Job을 구성하는 단일 Step 단계 정의 Step = 그 안에서 실행되는 한 단계 (ex. Redis → RDS 저장)
-		return new StepBuilder(JobStepName.BOARD_STAT_JOB.name(), jobRepository)
-			.<BoardStatEventResponseDto, BoardStatEventResponseDto>chunk(1000, transactionManager)
-			.reader(reader)
-			.writer(writer)
-			.build();
-	}
 }
